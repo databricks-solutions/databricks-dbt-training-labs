@@ -60,7 +60,7 @@ resources:
       environments:
         - environment_key: dbt_env
           spec:
-            client: "1"
+            environment_version: "5"
             dependencies:
               - dbt-databricks>=1.8.0,<2.0.0
 

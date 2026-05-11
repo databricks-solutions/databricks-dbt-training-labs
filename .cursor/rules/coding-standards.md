@@ -15,7 +15,7 @@
 - Schema, freshness, and data tests live in `*.yml` files alongside the models or sources they describe.
 - Use `dbt-databricks>=1.8.0,<2.0.0` and target Unity Catalog (catalog + schema in the profile or DAB variables).
 - Prefer SQL Warehouses for production runs; reserve interactive clusters for ad-hoc dev.
-- For deployment, prefer Databricks Asset Bundles (`databricks.yml` + `resources/*.yml`) over hand-crafted Jobs UI configuration.
+- For deployment, prefer [Declarative Automation Bundles (DABs)](https://docs.databricks.com/dev-tools/bundles) (`databricks.yml` + `resources/*.yml`) over hand-crafted Jobs UI configuration.
 
 ## Secrets and Local Config
 
