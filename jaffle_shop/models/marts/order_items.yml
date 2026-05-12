@@ -1,0 +1,15 @@
+models:
+  - name: order_items
+    description: Order items mart, joining order items with order, product, and supply data. One row per order item.
+    columns:
+      - name: order_item_id
+        description: The unique key for each order item.
+        data_tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: The foreign key relating to the order this item belongs to.
+        data_tests:
+          - relationships:
+              to: ref('orders')
+              field: order_id

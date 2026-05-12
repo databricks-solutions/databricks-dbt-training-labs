@@ -1,5 +1,37 @@
-*conf*.json
-.DS_Store
-__pycache__
+# Local deployment (workspace-specific DAB config, profiles, etc.)
+# databricks.yml must be at repo root for DAB to sync all files.
+# Only local_deployment/README.md is tracked -- everything else stays local.
+databricks.yml
+local_deployment/*
+!local_deployment/README.md
+
+# Local MCP / deploy configs
+mcp_config.json
+deploy_config.yaml
+
+# Databricks CLI state
+.databricks/
+
+# dbt
+target/
+dbt_packages/
+logs/
+profiles.yml
+.user.yml
+
+# Python / venv
+*.pyc
+__pycache__/
+.venv/
+venv/
+
+# IDE
 .idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Environment / secrets
 .env
+*.pem

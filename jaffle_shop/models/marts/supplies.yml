@@ -1,0 +1,19 @@
+models:
+  - name: supplies
+    description: Supplies data mart, one row per supply cost per product.
+    columns:
+      - name: supply_uuid
+        description: The unique key for each supply record.
+        data_tests:
+          - not_null
+          - unique
+      - name: supply_id
+        description: The identifier for the supply.
+      - name: product_id
+        description: The product this supply is associated with.
+      - name: supply_name
+        description: The name of the supply.
+      - name: supply_cost
+        description: The cost of the supply in dollars.
+      - name: is_perishable_supply
+        description: Boolean indicating if this supply is perishable.

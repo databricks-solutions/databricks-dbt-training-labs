@@ -1,0 +1,19 @@
+models:
+  - name: locations
+    description: Location overview data mart, offering key details for each store location including order metrics. One row per location.
+    columns:
+      - name: location_id
+        description: The unique key for each location.
+        data_tests:
+          - not_null
+          - unique
+      - name: location_name
+        description: The name of the store location.
+      - name: tax_rate
+        description: The tax rate applied at this location.
+      - name: opened_date
+        description: The date the location opened.
+      - name: count_orders
+        description: Total number of orders placed at this location.
+      - name: total_revenue
+        description: Total revenue generated at this location.
