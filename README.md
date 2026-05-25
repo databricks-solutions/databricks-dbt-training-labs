@@ -5,7 +5,7 @@ Self-service, hands-on labs that complement an upcoming [dbt](https://www.getdbt
 ## Mission
 
 - **Course companion.** Each lab maps to a section of the dbt-on-Databricks course and is designed to be opened, read, and run end-to-end without an instructor.
-- **Self-service.** Clone the repo, fill in your own workspace values locally, and run. No shared environment, no shared state.
+- **Self-service.** Clone (or fork) the repo, fill in your own workspace values locally, and run. No shared environment, no shared state.
 - **Production-shaped, not toy.** Models follow the staging + marts layering, use Unity Catalog with `dbt-databricks`, and are deployable as Lakeflow Jobs via DABs.
 - **Public-safe.** Everything tracked here is portable across any Databricks workspace; workspace-specific config stays local (see [`local_deployment/`](local_deployment/)).
 
