@@ -55,7 +55,7 @@ cp profiles.yml.example profiles.yml
 #      DATABRICKS_HOST          -> https://<your-workspace>.cloud.databricks.com
 #      DATABRICKS_HTTP_PATH     -> /sql/1.0/warehouses/<your-warehouse-id>
 #      DATABRICKS_CATALOG       -> <your-catalog>
-#      DATABRICKS_SCHEMA        -> jaffle_shop  (or any schema you own)
+#      DATABRICKS_SCHEMA        -> dbt_<first-initial><last-name>  (best practices are to build models in development in a personal schema)
 #      DATABRICKS_TOKEN         -> <your-pat>   (or use OAuth, see below)
 #    profiles.yml reads these via env_var() at runtime, so you only fill in .env.
 
