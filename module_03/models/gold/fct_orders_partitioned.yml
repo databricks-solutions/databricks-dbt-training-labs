@@ -1,0 +1,63 @@
+models:
+  - name: fct_orders_partitioned
+    description: >
+      Gold order fact table, materialized as a Delta table partitioned by order_month. One row per
+      order. Paired with fct_orders_clustered so you can compare the two physical layouts with
+      DESCRIBE DETAIL.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "order_total = subtotal + tax_paid"
+      - dbt_utils.expression_is_true:
+          expression: "order_items_subtotal = subtotal"
+    columns:
+      - name: order_id
+        description: The unique key of the gold order fact.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: Foreign key to the customer who placed the order.
+        data_tests:
+          - relationships:
+              to: source('silver', 'silver_customers')
+              field: customer_id
+      - name: location_id
+        description: Foreign key to the store the order was placed at.
+        data_tests:
+          - relationships:
+              to: source('silver', 'silver_locations')
+              field: location_id
+      - name: order_date
+        description: The date the order was placed. 365 distinct values, too many to partition on here.
+        data_tests:
+          - not_null
+      - name: order_month
+        description: >
+          The order date truncated to the first of the month. The partition key for this model,
+          giving 12 partitions across the dataset.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: The city the order was placed in.
+      - name: subtotal
+        description: Order value before tax, in dollars.
+      - name: tax_paid
+        description: Tax charged on the order, in dollars.
+      - name: order_total
+        description: Order value including tax, in dollars.
+      - name: order_items_subtotal
+        description: Sum of the list prices of the items on the order. 0 for item-less orders.
+        data_tests:
+          - not_null
+      - name: count_order_items
+        description: Number of items on the order. 0 for item-less orders.
+        data_tests:
+          - not_null
+      - name: count_food_items
+        description: Number of jaffle items on the order.
+      - name: count_drink_items
+        description: Number of beverage items on the order.
+      - name: is_food_order
+        description: True when the order included at least one food item.
+      - name: is_drink_order
+        description: True when the order included at least one drink item.

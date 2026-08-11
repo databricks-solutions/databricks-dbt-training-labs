@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: fct_orders_daily_overwrite
+    description: >
+      Daily order aggregates loaded with the insert_overwrite strategy, partitioned by order_month.
+      One row per order_date. Each run replaces every partition the incremental SELECT touched and
+      leaves the rest alone, which is what makes a partition-scoped batch reload cheap.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "order_total = subtotal + tax_paid"
+      - dbt_utils.expression_is_true:
+          expression: "count_orders > 0"
+    columns:
+      - name: order_date
+        description: The day being aggregated. The grain of this model.
+        data_tests:
+          - not_null
+          - unique
+      - name: order_month
+        description: >
+          order_date truncated to the first of the month. The partition key, and therefore the unit
+          insert_overwrite replaces. The incremental filter must filter on this column.
+        data_tests:
+          - not_null
+      - name: count_orders
+        description: Number of orders placed that day.
+      - name: count_customers
+        description: Distinct customers who ordered that day.
+      - name: order_total
+        description: Total order value including tax, in dollars.
+      - name: subtotal
+        description: Total order value before tax, in dollars.
+      - name: tax_paid
+        description: Total tax charged that day, in dollars.
+      - name: avg_order_total
+        description: Mean order value that day, in dollars.
+
+  - name: fct_orders_upsert
+    description: >
+      Order-grain fact loaded with the merge strategy, keyed on order_id. Re-running over an
+      overlapping window updates rows in place rather than duplicating them, so the model is
+      idempotent. Compare with fct_orders_daily_overwrite, which replaces whole partitions instead.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "order_total = subtotal + tax_paid"
+    columns:
+      - name: order_id
+        description: >
+          The unique key of an order, and the merge key. Must be unique and not-null: duplicates
+          here abort the MERGE with DELTA_MULTIPLE_SOURCE_ROW_MATCHING_TARGET_ROW_IN_MERGE, and
+          NULLs match other NULLs because dbt builds the ON clause with null-safe equality.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: Foreign key to silver_customers.
+        data_tests:
+          - not_null
+          - relationships:
+              to: source('silver', 'silver_customers')
+              field: customer_id
+      - name: location_id
+        description: Foreign key to silver_locations.
+        data_tests:
+          - not_null
+          - relationships:
+              to: source('silver', 'silver_locations')
+              field: location_id
+      - name: order_date
+        description: The date the order was placed. Drives the incremental lookback window.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: The city the order was placed in.
+      - name: subtotal
+        description: Order value before tax, in dollars.
+      - name: tax_paid
+        description: Tax charged on the order, in dollars.
+      - name: order_total
+        description: Order value including tax, in dollars.
+      - name: dbt_loaded_at
+        description: >
+          When dbt last wrote this row. Moves on every upsert, which is how you prove a merge
+          updated rows in place instead of inserting new ones.
+        data_tests:
+          - not_null

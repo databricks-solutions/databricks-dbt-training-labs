@@ -1,0 +1,118 @@
+version: 2
+
+sources:
+  - name: silver
+    schema: silver
+    description: >
+      Silver Jaffle Shop tables loaded by `dbt seed` into the shared `silver` schema.
+      Labs read via source('silver', ...). See models/silver/README.md for details.
+    tables:
+      - name: silver_orders
+        description: >
+          Cleaned orders, one row per order, amounts in decimal dollars and order_date at day grain.
+          Spans 2024-09-01 to 2025-08-31: 365 distinct days across 12 months. The gold labs' primary
+          input.
+        data_tests:
+          - dbt_utils.expression_is_true:
+              expression: "order_total = subtotal + tax_paid"
+        columns:
+          - name: order_id
+            description: The unique key of an order.
+            data_tests:
+              - not_null
+              - unique
+          - name: customer_id
+            description: Foreign key to silver_customers.
+            data_tests:
+              - not_null
+              - relationships:
+                  to: source('silver', 'silver_customers')
+                  field: customer_id
+          - name: location_id
+            description: Foreign key to silver_locations.
+            data_tests:
+              - not_null
+              - relationships:
+                  to: source('silver', 'silver_locations')
+                  field: location_id
+          - name: order_date
+            description: The date the order was placed.
+            data_tests:
+              - not_null
+          - name: subtotal
+            description: Order value before tax, in dollars.
+          - name: tax_paid
+            description: Tax charged on the order, in dollars.
+          - name: order_total
+            description: Order value including tax, in dollars.
+
+      - name: silver_order_items
+        description: Cleaned order lines, one row per item on an order, keyed by SKU.
+        columns:
+          - name: order_item_id
+            description: The unique key of an order line.
+            data_tests:
+              - not_null
+              - unique
+          - name: order_id
+            description: Foreign key to silver_orders.
+            data_tests:
+              - not_null
+              - relationships:
+                  to: source('silver', 'silver_orders')
+                  field: order_id
+          - name: product_id
+            description: Foreign key to silver_products.
+            data_tests:
+              - not_null
+              - relationships:
+                  to: source('silver', 'silver_products')
+                  field: product_id
+
+      - name: silver_customers
+        description: Cleaned customers, one row per person who has placed at least one order.
+        columns:
+          - name: customer_id
+            description: The unique key of a customer.
+            data_tests:
+              - not_null
+              - unique
+          - name: customer_name
+            description: Full name of the customer.
+
+      - name: silver_products
+        description: Cleaned products, one row per SKU, with prices in dollars and food/drink flags.
+        columns:
+          - name: product_id
+            description: The unique key of a product (SKU).
+            data_tests:
+              - not_null
+              - unique
+          - name: product_name
+            description: Display name of the product.
+          - name: product_type
+            description: Either jaffle or beverage.
+            data_tests:
+              - accepted_values:
+                  values: ["jaffle", "beverage"]
+          - name: product_price
+            description: List price in dollars.
+          - name: is_food_item
+            description: True when the product is a jaffle.
+          - name: is_drink_item
+            description: True when the product is a beverage.
+
+      - name: silver_locations
+        description: Cleaned stores, one row per location.
+        columns:
+          - name: location_id
+            description: The unique key of a store.
+            data_tests:
+              - not_null
+              - unique
+          - name: location_name
+            description: The city the store trades in.
+          - name: opened_at
+            description: The date the store opened.
+          - name: tax_rate
+            description: Sales tax rate applied at this store.

@@ -1,0 +1,7 @@
+models:
+  - name: int_orders_enriched
+    description: >
+      Ephemeral intermediate model holding the shared gold logic: one row per order, enriched with
+      per-order item aggregates and the store name, plus both partition key candidates
+      (order_date at day grain, order_month at month grain). Inlined into the two gold models so
+      the only difference between them is their physical layout config.

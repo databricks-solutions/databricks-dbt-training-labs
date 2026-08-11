@@ -1,0 +1,54 @@
+version: 2
+
+# Pin column_types: DECIMAL(16,2) for money, DATE for partition/cutoff columns.
+# See models/silver/README.md for how the seed layer fits the module.
+
+seeds:
+  - name: silver_customers
+    description: Silver customers, one row per customer.
+    config:
+      column_types:
+        customer_id: string
+        customer_name: string
+
+  - name: silver_locations
+    description: Silver locations, one row per store.
+    config:
+      column_types:
+        location_id: string
+        location_name: string
+        opened_at: date
+        tax_rate: decimal(5,4)
+
+  - name: silver_products
+    description: Silver products, one row per SKU, with prices in dollars and food/drink flags.
+    config:
+      column_types:
+        product_id: string
+        product_name: string
+        product_type: string
+        product_price: decimal(16,2)
+        is_food_item: boolean
+        is_drink_item: boolean
+
+  - name: silver_orders
+    description: >
+      Silver orders, one row per order, spanning 2024-09-01 to 2025-08-31 (365 days, 12 months,
+      61,948 orders). The primary input for the gold and incremental labs.
+    config:
+      column_types:
+        order_id: string
+        customer_id: string
+        location_id: string
+        order_date: date
+        subtotal: decimal(16,2)
+        tax_paid: decimal(16,2)
+        order_total: decimal(16,2)
+
+  - name: silver_order_items
+    description: Silver order items, one row per item on an order.
+    config:
+      column_types:
+        order_item_id: string
+        order_id: string
+        product_id: string

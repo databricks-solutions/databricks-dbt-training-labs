@@ -21,15 +21,17 @@ Future labs will build on this foundation with **several deeper and more diverse
 - Star and dimensional modelling beyond the Jaffle toy schema
 - Data Vault style raw / business vault layers
 - Wide event / semi-structured (JSON, variants) modelling
-- Performance tuning: liquid clustering, partitioning, Z-ORDER, photon, materialization choice
+- Performance tuning: Z-ORDER, photon (partitioning, liquid clustering and materialization choice are covered in [`module_03/`](module_03/))
 - Unity Catalog governance: row/column masking, tags, lineage-aware models
 - Multi-environment promotion (dev / staging / prod) via DAB targets and CI
 
-Each subsequent lab lands as its own top-level project folder, mirroring the `jaffle_shop/` layout, so you can run them independently in the same workspace.
+Standalone labs land as their own top-level project folder (e.g. `jaffle_shop/`). Multi-lab course
+modules share one dbt project with a lab folder per exercise (e.g. `module_03/`).
 
 | Path | Purpose |
 |------|---------|
 | [`jaffle_shop/`](jaffle_shop/) | Lab 01 — the dbt project: staging + marts models, seeds, macros, tests, packages. |
+| [`module_03/`](module_03/) | **Module 3 — Modeling with dbt on Databricks.** Self-contained dbt project with shared silver seeds; [Lab 3.5](module_03/models/gold/README.md) (partitioning and liquid clustering) and [Lab 3.6](module_03/models/incremental/README.md) (incremental insert-overwrite and MERGE). See the [silver boilerplate README](module_03/models/silver/README.md). |
 | [`local_deployment/`](local_deployment/) | Workspace-specific DAB and deploy config. Only the README is tracked; everything else stays local. |
 | [`.cursor/rules/`](.cursor/rules/) | Cursor agent guardrails: public-repo compliance, branch conventions, coding standards. |
 
@@ -40,7 +42,7 @@ Each subsequent lab lands as its own top-level project folder, mirroring the `ja
 - A catalog and schema you own (or the right to create one)
 - [Databricks CLI](https://docs.databricks.com/dev-tools/cli/install.html) v0.218+ configured with a profile
 - Python 3.10+
-- `dbt-databricks>=1.8.0,<2.0.0`
+- `dbt-databricks>=1.11.7,<2.0.0`
 
 ## Quick start (local dbt run)
 
@@ -92,12 +94,25 @@ If you'd rather use a PAT for a quick test, replace the OAuth pair with `token =
 
 ### Validate, deploy, run
 
+The root `databricks.yml` is thin: it `include:`s one job-resource file per deployable unit from
+`local_deployment/resources/` (all gitignored). Lab 01 is a single job; Module 3 is split into a
+shared **seed** job (run once per workspace) and **per-lab build** jobs, because its silver seeds are
+workspace-wide while gold/incremental builds are per-developer. See
+[local_deployment/README.md](local_deployment/README.md) for the full layout.
+
 From the repo root, pass `--profile` to every bundle command (or set `DATABRICKS_CONFIG_PROFILE=dbt-ws-profile` once for the shell):
 
 ```bash
 databricks bundle validate --profile=dbt-ws-profile
 databricks bundle deploy   --profile=dbt-ws-profile
+
+# Lab 01
 databricks bundle run jaffle_shop_dbt_job --profile=dbt-ws-profile
+
+# Module 3: seed the shared silver layer once, then build a lab
+databricks bundle run module_03_seed_job        --profile=dbt-ws-profile
+databricks bundle run module_03_gold_job        --profile=dbt-ws-profile
+databricks bundle run module_03_incremental_job --profile=dbt-ws-profile
 ```
 
 ## How to get help
