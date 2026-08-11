@@ -1,0 +1,11 @@
+product_id,product_name,product_type,product_price,is_food_item,is_drink_item
+JAF-001,nutellaphone who dis?,jaffle,11.00,true,false
+JAF-002,doctor stew,jaffle,11.00,true,false
+JAF-003,the krautback,jaffle,12.00,true,false
+JAF-004,flame impala,jaffle,14.00,true,false
+JAF-005,mel-bun,jaffle,12.00,true,false
+BEV-001,tangaroo,beverage,6.00,false,true
+BEV-002,chai and mighty,beverage,5.00,false,true
+BEV-003,vanilla ice,beverage,6.00,false,true
+BEV-004,for richer or pourover,beverage,7.00,false,true
+BEV-005,adele-ade,beverage,4.00,false,true
