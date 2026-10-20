@@ -1,0 +1,70 @@
+version: 2
+
+# Starter model YAML (FEIP-8102): descriptions only, NO tests. Adding tests to this file is what the
+# generic-test labs teach. See the module README for the defect catalog these tests should find.
+
+models:
+  - name: stg_customers
+    description: One row per customer. Known defects D01 (NULL name) and D02 (duplicated key).
+    columns:
+      - name: customer_id
+        description: The customer's key. Should be unique and not null.
+      - name: customer_name
+        description: The customer's full name. Should not be null.
+
+  - name: stg_products
+    description: One row per SKU. Clean.
+    columns:
+      - name: product_id
+        description: The product's key (SKU).
+      - name: product_name
+        description: Display name.
+      - name: product_type
+        description: Either jaffle or beverage.
+      - name: product_price
+        description: List price in dollars.
+
+  - name: stg_locations
+    description: One row per store. Clean.
+    columns:
+      - name: location_id
+        description: The store's key.
+      - name: location_name
+        description: The city the store trades in.
+      - name: opened_at
+        description: The date the store opened.
+      - name: tax_rate
+        description: Sales tax rate applied at this store.
+
+  - name: stg_orders
+    description: >
+      One row per order. Known defects D03 (orphan customer_id), D04 (invalid order_status),
+      D05 (negative tax_paid) and D06 (subtotal != sum of item prices, x4). Two orders are
+      legitimately item-less (subtotal 0).
+    columns:
+      - name: order_id
+        description: The order's key.
+      - name: customer_id
+        description: Foreign key to stg_customers.customer_id.
+      - name: location_id
+        description: Foreign key to stg_locations.location_id.
+      - name: order_date
+        description: The date the order was placed.
+      - name: order_status
+        description: One of placed, shipped, delivered, returned, cancelled.
+      - name: subtotal
+        description: Order value before tax, in dollars. Should equal the sum of its item prices.
+      - name: tax_paid
+        description: Tax charged on the order, in dollars. Should be >= 0.
+      - name: order_total
+        description: Order value including tax, in dollars (subtotal + tax_paid).
+
+  - name: stg_order_items
+    description: One row per item on an order. Known defect D07 (two lines with an unknown SKU).
+    columns:
+      - name: order_item_id
+        description: The line's key.
+      - name: order_id
+        description: Foreign key to stg_orders.order_id.
+      - name: product_id
+        description: Foreign key to stg_products.product_id.

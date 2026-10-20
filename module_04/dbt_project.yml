@@ -1,0 +1,27 @@
+config-version: 2
+
+name: "module_04"
+version: "1.0.0"
+require-dbt-version: ">=1.11.0"
+
+profile: module_04
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["data-tests"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Module 4 is self-contained: `dbt seed` loads the fixtures (with a documented catalog of known
+# defects) into YOUR schema, so every lab starts from the same repeatable state and nothing is
+# shared between learners. Seeds are tiny, so reseeding is cheap. See README.md.
+models:
+  module_04:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
