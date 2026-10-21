@@ -1,0 +1,30 @@
+version: 2
+
+# Starter model YAML: descriptions only, NO tests or constraints.
+
+models:
+  - name: fct_orders
+    description: >
+      Order-grain fact, a Delta table. The target for the later "Delta constraints vs dbt tests" lab.
+      Inherits the order defects from stg_orders (D03, D04, D05, D06).
+    columns:
+      - name: order_id
+        description: The order's key.
+      - name: customer_id
+        description: Foreign key to stg_customers.customer_id.
+      - name: location_id
+        description: Foreign key to stg_locations.location_id.
+      - name: location_name
+        description: The city the order was placed in.
+      - name: order_date
+        description: The date the order was placed.
+      - name: order_status
+        description: One of placed, shipped, delivered, returned, cancelled.
+      - name: subtotal
+        description: Order value before tax, in dollars.
+      - name: tax_paid
+        description: Tax charged on the order, in dollars. Should be >= 0.
+      - name: order_total
+        description: Order value including tax, in dollars.
+      - name: count_order_items
+        description: Number of item lines on the order. 0 for item-less orders.

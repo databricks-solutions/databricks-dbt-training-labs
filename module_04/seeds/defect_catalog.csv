@@ -1,0 +1,12 @@
+defect_id,table_name,row_key,rule_violated,caught_by
+D01,customers,387603c1-d2a6-475e-ab4c-9ba7aa78bb27,customer_name must not be null,generic test: not_null
+D02,customers,4423c47b-1f8b-4df4-bfe9-531cd8e6441b,customer_id must be unique,generic test: unique
+D03,orders,cdd14f73-ce95-43ed-ba0a-4161fbf2451a,customer_id must exist in customers,generic test: relationships
+D04,orders,92da1a8e-bb2c-4033-a013-99c1bcb03a2d,order_status must be one of placed/shipped/delivered/returned/cancelled,generic test: accepted_values
+D05,orders,e0d8edd2-799d-4daa-a1da-6a38155f030f,tax_paid must be >= 0,Delta CHECK constraint / expression_is_true
+D06,orders,62eca845-b9e6-45e0-a0b5-84d794e57798,subtotal must equal the sum of its item prices,singular SQL test (Lab 4.3)
+D06,orders,8f4b2c2b-0f09-4bbd-ab33-8313ecb0adf6,subtotal must equal the sum of its item prices,singular SQL test (Lab 4.3)
+D06,orders,968a04a4-3cad-45bb-849c-a44038159ba8,subtotal must equal the sum of its item prices,singular SQL test (Lab 4.3)
+D06,orders,02a7ef77-e492-4aad-8cfd-ddc4a7c1084d,subtotal must equal the sum of its item prices,singular SQL test (Lab 4.3)
+D07,order_items,dbcdd557-130a-4adb-bf13-71a9f4ceb45f,product_id must exist in products,generic test: relationships (try severity: warn)
+D07,order_items,a0bb7fb6-f636-4f00-87b3-626cf8993dde,product_id must exist in products,generic test: relationships (try severity: warn)
