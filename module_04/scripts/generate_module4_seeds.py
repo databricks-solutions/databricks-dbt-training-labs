@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Generate the Module 4 testing-lab seeds: a small clean sample of Jaffle Shop data with a
-documented catalog of KNOWN defects injected on purpose (FEIP-8102).
+documented catalog of KNOWN defects injected on purpose.
 
 Every Module 4 lab needs data that is realistic, tiny (fast to reseed), self-contained (no output
 from earlier modules), and deliberately imperfect in ways we can name. So this script:

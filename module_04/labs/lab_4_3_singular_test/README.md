@@ -80,12 +80,14 @@ Save the failing rows to a table you can query:
 dbt test --select assert_order_subtotal_matches_items --store-failures
 ```
 
-dbt writes them to a table named after the test, in a `<your-schema>_dbt_test__audit` schema (for
-example `module_04_dbt_test__audit.assert_order_subtotal_matches_items`). Then:
+dbt writes them to a table named after the test, in a schema called `<your_schema>_dbt_test__audit`,
+so the full name is `<your_catalog>.<your_schema>_dbt_test__audit.assert_order_subtotal_matches_items`.
+Then:
 
 - Query the stored rows. They hold the columns your test selected, so compare `subtotal` with
   `items_subtotal` and look at `difference` for each order.
-- Cross-check the answer key: `select * from defect_catalog where defect_id = 'D06'`. The same four
+- Cross-check the answer key:
+  `select * from <your_catalog>.<your_schema>.defect_catalog where defect_id = 'D06'`. The same four
   `order_id`s should be listed. Your test found exactly what was planted.
 - Think about the two item-less orders. They have no row in the item totals, so their total is `NULL`.
   Without `coalesce`, `subtotal <> NULL` is neither true nor false and the row is silently dropped.
@@ -94,15 +96,23 @@ example `module_04_dbt_test__audit.assert_order_subtotal_matches_items`). Then:
 ### 5. Make it pass
 
 `stg_orders` has a switch that excludes the four D06 orders listed in `defect_catalog`. It is a
-**view**, so a `--vars` value is applied when the view is *built*, not when a test runs. Rebuild the
-model and rerun the test in one command:
+**view**, so a `--vars` value is applied when the view is *built*, not when a test runs. So rebuild
+the view with the var first, then rerun the test:
 
 ```bash
-dbt build --select stg_orders assert_order_subtotal_matches_items \
-  --vars '{"quarantine_subtotal_defects": true}'
+dbt run --select stg_orders --vars '{"quarantine_subtotal_defects": true}'
+dbt test --select assert_order_subtotal_matches_items
 ```
 
-The same test now returns 0 rows and **passes**. To put the original data back:
+The same test now returns 0 rows and **passes**.
+
+Run these as two commands. A single `dbt build --select stg_orders assert_order_subtotal_matches_items`
+would also run any generic tests on `stg_orders`, and the ones for D03, D04 and D05 still fail, so it
+would exit with an error even though this lab's test passed.
+
+**Restore the view before you move on.** `fct_orders` is a table and these commands do not rebuild it,
+so it still has the D06 orders. But anything rebuilt from `stg_orders` while the quarantine is in place,
+`fct_orders` included, loses them and changes the counts in later labs. To put the original data back:
 
 ```bash
 dbt run --select stg_orders
@@ -121,7 +131,7 @@ dbt run --select stg_orders
 
 - **A singular test passes on zero rows.** Every returned row is a failure.
 - **`NULL` comparisons drop rows.** Use `left join` plus `coalesce` when a side may be missing.
-- **Vars apply at build time.** Rebuild the view in the same command as the test.
+- **Vars apply at build time.** Rebuild the view with the var first, then run the test.
 - **No trailing semicolon.** dbt wraps your query to count its rows, so a `;` gives a
   `PARSE_SYNTAX_ERROR`. That is an **ERROR**, not a **FAIL**: the test never ran, so do not read it as
   "the data is bad".

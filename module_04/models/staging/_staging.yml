@@ -1,6 +1,6 @@
 version: 2
 
-# Starter model YAML (FEIP-8102): descriptions only, NO tests. Adding tests to this file is what the
+# Starter model YAML: descriptions only, NO tests. Adding tests to this file is what the
 # generic-test labs teach. See the module README for the defect catalog these tests should find.
 
 models:

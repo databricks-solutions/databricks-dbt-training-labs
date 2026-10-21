@@ -116,7 +116,8 @@ dbt-databricks 1.11.7, into an empty schema:
 | Seed row counts | `customers` 31 · `orders` 80 · `order_items` 104 · `products` 10 · `locations` 6 · `defect_catalog` 11 |
 | One test per defect (throwaway copy) | D01 **1** · D02 **1** · D03 **1** · D04 **1** · D05 **1** · D06 **4** · D07 **2** failing rows |
 | Lab 4.3 solution, `dbt test` | **fails with 4 rows**, the same 4 `order_id`s as D06 in `defect_catalog` |
-| Lab 4.3 with `quarantine_subtotal_defects`, built and tested in one command | **passes with 0 rows** |
+| Lab 4.3 with `quarantine_subtotal_defects`: `dbt run --select stg_orders --vars ...`, then `dbt test --select assert_order_subtotal_matches_items` | **passes with 0 rows**; restoring with `dbt run --select stg_orders` makes it fail with 4 rows again |
+| The same quarantine as a single `dbt build --select stg_orders assert_order_subtotal_matches_items`, with generic tests for D03, D04 and D05 added | **exits with an error**: Lab 4.3's test passes, but the 3 generic tests on `stg_orders` fail |
 
 `customers` holds 31 rows because D02 duplicates one of the 30 customers. The row counts, node counts
 and failing-row counts above are for the supplied seed. Verify against your own run rather than

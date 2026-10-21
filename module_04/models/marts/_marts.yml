@@ -1,6 +1,6 @@
 version: 2
 
-# Starter model YAML (FEIP-8102): descriptions only, NO tests or constraints.
+# Starter model YAML: descriptions only, NO tests or constraints.
 
 models:
   - name: fct_orders

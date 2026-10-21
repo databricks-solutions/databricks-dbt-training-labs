@@ -115,7 +115,7 @@ databricks bundle run module_03_seed_job        --profile=dbt-ws-profile
 databricks bundle run module_03_gold_job        --profile=dbt-ws-profile
 databricks bundle run module_03_incremental_job --profile=dbt-ws-profile
 
-# Module 4: seeds are per-developer too, so seed then build into your own schema
+# Module 4: unlike Module 3, seeds are per-developer, so seed then build into your own schema
 databricks bundle run module_04_seed_job        --profile=dbt-ws-profile
 databricks bundle run module_04_build_job       --profile=dbt-ws-profile
 ```
