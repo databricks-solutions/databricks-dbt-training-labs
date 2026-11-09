@@ -26,13 +26,14 @@ Future labs will build on this foundation with **several deeper and more diverse
 - Multi-environment promotion (dev / staging / prod) via DAB targets and CI
 
 Standalone labs land as their own top-level project folder (e.g. `jaffle_shop/`). Multi-lab course
-modules share one dbt project with a lab folder per exercise (e.g. `module_03/`, `module_04/`).
+modules share one dbt project with a lab folder per exercise (e.g. `module_03/`, `module_04/`, `module_05/`).
 
 | Path | Purpose |
 |------|---------|
 | [`jaffle_shop/`](jaffle_shop/) | Lab 01 — the dbt project: staging + marts models, seeds, macros, tests, packages. |
 | [`module_03/`](module_03/) | **Module 3 — Modeling with dbt on Databricks.** Self-contained dbt project with shared silver seeds; [Lab 3.5](module_03/models/gold/README.md) (partitioning and liquid clustering) and [Lab 3.6](module_03/models/incremental/README.md) (incremental insert-overwrite and MERGE). See the [silver boilerplate README](module_03/models/silver/README.md). |
 | [`module_04/`](module_04/) | **Module 4 — Testing and Data Quality with dbt on Databricks.** Self-contained lab boilerplate: seeded fixtures with a catalog of known defects (deterministic pass/fail cases) and starter models with no generic tests yet; [Lab 4.3](module_04/labs/lab_4_3_singular_test/README.md) (singular SQL test). See the [Module 4 README](module_04/README.md). |
+| [`module_05/`](module_05/) | **Module 5 — Documentation and Governance with dbt and Unity Catalog.** Self-contained lab boilerplate: a clean seeded dataset with one column of personal data and starter models that carry only a one-line description; [Lab 5.1](module_05/labs/lab_5_1_document_and_govern/README.md) (generate dbt docs, `persist_docs`, Unity Catalog tags, grants and a column mask, dbt versus Unity Catalog lineage, reproducible and auditable delivery). See the [Module 5 README](module_05/README.md). |
 | [`local_deployment/`](local_deployment/) | Workspace-specific DAB and deploy config. Only the README is tracked; everything else stays local. |
 | [`.cursor/rules/`](.cursor/rules/) | Cursor agent guardrails: public-repo compliance, branch conventions, coding standards. |
 
@@ -118,6 +119,10 @@ databricks bundle run module_03_incremental_job --profile=dbt-ws-profile
 # Module 4: unlike Module 3, seeds are per-developer, so seed then build into your own schema
 databricks bundle run module_04_seed_job        --profile=dbt-ws-profile
 databricks bundle run module_04_build_job       --profile=dbt-ws-profile
+
+# Module 5: seed into your own schema, then build the documented models
+databricks bundle run module_05_seed_job        --profile=dbt-ws-profile
+databricks bundle run module_05_build_job       --profile=dbt-ws-profile
 ```
 
 ## How to get help

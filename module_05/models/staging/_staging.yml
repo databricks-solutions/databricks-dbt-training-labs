@@ -1,0 +1,21 @@
+version: 2
+
+# STARTER YAML: one-line model descriptions only. No column descriptions, no tags, no doc blocks.
+# That is the point: run `dbt docs generate` and see how much of the project is undocumented.
+# Lab 5.1 fills this in. The finished version is in labs/lab_5_1_document_and_govern/solution/.
+
+models:
+  - name: stg_customers
+    description: One row per customer.
+
+  - name: stg_products
+    description: One row per SKU.
+
+  - name: stg_locations
+    description: One row per store.
+
+  - name: stg_orders
+    description: One row per order.
+
+  - name: stg_order_items
+    description: One row per item on an order.

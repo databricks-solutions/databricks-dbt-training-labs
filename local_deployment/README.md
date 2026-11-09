@@ -27,6 +27,8 @@ root `databricks.yml`:
 | `resources/module_03_incremental_job.yml` | `local_deployment/resources/` | Gitignored | Module 3 Lab 3.6 (incremental) build job |
 | `resources/module_04_seed_job.yml` | `local_deployment/resources/` | Gitignored | Module 4 seed job (**per-developer** schema) |
 | `resources/module_04_build_job.yml` | `local_deployment/resources/` | Gitignored | Module 4 build + test job |
+| `resources/module_05_seed_job.yml` | `local_deployment/resources/` | Gitignored | Module 5 seed job (**per-developer** schema) |
+| `resources/module_05_build_job.yml` | `local_deployment/resources/` | Gitignored | Module 5 build job (documented models) |
 
 ### Why jobs are split this way
 
@@ -42,6 +44,10 @@ root `databricks.yml`:
 - **Module 4 also separates seed from build, but nothing is shared.** Its fixtures are tiny and the
   labs deliberately add tests that fail, so `module_04_seed_job` loads them into **your own** schema
   (`module_04_schema`). Run it before `module_04_build_job`; reseeding is cheap and safe to repeat.
+- **Module 5 follows the Module 4 shape.** `module_05_seed_job` loads its small clean fixtures into
+  **your own** schema (`module_05_schema`); run it before `module_05_build_job`. Once you finish Lab 5.1,
+  the same build job also persists the documentation, tags, grants and column mask to Unity Catalog on
+  every run, so the governance is part of the deployed pipeline, not a manual step.
 
 ## Deploying to your own workspace
 
@@ -64,6 +70,10 @@ root `databricks.yml`:
    # Module 4: seed into your own schema, then build and test
    databricks bundle run module_04_seed_job         --profile <your-profile>
    databricks bundle run module_04_build_job        --profile <your-profile>
+
+   # Module 5: seed into your own schema, then build the documented models
+   databricks bundle run module_05_seed_job         --profile <your-profile>
+   databricks bundle run module_05_build_job        --profile <your-profile>
    ```
 
 ### Example root `databricks.yml` (placeholders only)
@@ -88,6 +98,9 @@ variables:
   module_04_schema:
     description: Per-developer schema for Module 4 testing labs (seeds and models)
     default: "module_04"
+  module_05_schema:
+    description: Per-developer schema for Module 5 documentation and governance labs (seeds and models)
+    default: "module_05"
   notification_email:
     description: Address that receives job failure notifications
     default: "<your-email>"
@@ -330,6 +343,70 @@ resources:
           - "${var.notification_email}"
 ```
 
+### Example `local_deployment/resources/module_05_seed_job.yml` (Module 5)
+
+Seeds into **your own** schema (`${var.module_05_schema}`), so run it before `module_05_build_job`.
+Module 5 uses no dbt packages, so there is no `dbt deps` command.
+
+```yaml
+resources:
+  jobs:
+    module_05_seed_job:
+      name: "[${bundle.target}] Module 5 - Seed documentation fixtures"
+      environments:
+        - environment_key: dbt_env
+          spec:
+            environment_version: "5"
+            dependencies:
+              - dbt-databricks==1.11.7
+      tasks:
+        - task_key: dbt_seed
+          environment_key: dbt_env
+          dbt_task:
+            source: WORKSPACE
+            project_directory: ../../module_05
+            commands:
+              - "dbt seed --full-refresh"
+            warehouse_id: ${var.warehouse_id}
+            catalog: ${var.catalog_name}
+            schema: ${var.module_05_schema}
+      email_notifications:
+        on_failure:
+          - "${var.notification_email}"
+```
+
+### Example `local_deployment/resources/module_05_build_job.yml` (Module 5)
+
+Same shape; the command is `dbt build --exclude resource_type:seed` (the models, reading the fixtures the
+seed job loaded into the same schema). The starter builds 5 views and 2 Delta tables.
+
+```yaml
+resources:
+  jobs:
+    module_05_build_job:
+      name: "[${bundle.target}] Module 5 - Build documented models"
+      environments:
+        - environment_key: dbt_env
+          spec:
+            environment_version: "5"
+            dependencies:
+              - dbt-databricks==1.11.7
+      tasks:
+        - task_key: dbt_build
+          environment_key: dbt_env
+          dbt_task:
+            source: WORKSPACE
+            project_directory: ../../module_05
+            commands:
+              - "dbt build --exclude resource_type:seed"
+            warehouse_id: ${var.warehouse_id}
+            catalog: ${var.catalog_name}
+            schema: ${var.module_05_schema}
+      email_notifications:
+        on_failure:
+          - "${var.notification_email}"
+```
+
 > **Version pins:** Module 3 jobs require `dbt-databricks>=1.11.7` because the `insert_overwrite`
-> labs depend on `REPLACE ON` behaviour. Module 4 pins `dbt-databricks==1.11.7`, the version it was
+> labs depend on `REPLACE ON` behaviour. Modules 4 and 5 pin `dbt-databricks==1.11.7`, the version they were
 > validated on. Lab 01's job keeps `>=1.8.0`.

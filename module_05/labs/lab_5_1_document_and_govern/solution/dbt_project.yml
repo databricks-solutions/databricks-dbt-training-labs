@@ -1,0 +1,51 @@
+config-version: 2
+
+name: "module_05"
+version: "1.0.0"
+require-dbt-version: ">=1.11.0"
+
+profile: module_05
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Lab 5.1 solution. The differences from the starter are marked  <-- Lab 5.1.
+
+flags:
+  # dbt-databricks 1.11 applies column masks (and writes column comments in one pass) only with the
+  # revamped materializations. Without this flag a column_mask in YAML is silently ignored.
+  use_materialization_v2: true                                          # <-- Lab 5.1
+
+vars:
+  # Members of this account group see real emails; everyone else sees ***@domain.
+  pii_reader_group: pii_readers
+  # Optional: a group or user to grant SELECT on the marts to. Empty = no grants are issued.
+  reader_principal: ""
+
+# Create the mask function BEFORE any model that references it, so one `dbt build` works.
+on-run-start:
+  - "{{ create_pii_mask_function() }}"                                  # <-- Lab 5.1
+
+seeds:
+  module_05:
+    +persist_docs:                                                      # <-- Lab 5.1
+      relation: true
+
+models:
+  module_05:
+    # Write every description to Unity Catalog as table and column comments.
+    +persist_docs:                                                      # <-- Lab 5.1
+      relation: true
+      columns: true
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: ephemeral
+    marts:
+      +materialized: table

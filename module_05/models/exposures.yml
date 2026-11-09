@@ -1,0 +1,19 @@
+version: 2
+
+# An exposure documents a downstream consumer that dbt does not build. It shows up as a node at the
+# end of the DAG in the dbt docs site, so you can see which dashboards a model change would affect.
+# dbt cannot see this dashboard run queries; Unity Catalog can, once the dashboard is real. That is
+# the other half of the lineage story in Lab 5.1.
+
+exposures:
+  - name: weekly_orders_dashboard
+    label: Weekly orders dashboard
+    type: dashboard
+    maturity: medium
+    description: Weekly order volume and revenue by store, plus top customers by lifetime spend.
+    depends_on:
+      - ref('fct_orders')
+      - ref('dim_customers')
+    owner:
+      name: Data Platform Team
+      email: data-platform@example.com
