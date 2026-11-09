@@ -1,7 +1,8 @@
 -- Unity Catalog's PHYSICAL lineage for this schema: which tables were actually read to write which.
 -- Compare with the dbt docs graph (LOGICAL lineage). Differences are the point: ephemeral models
 -- and exposures exist only in dbt; readers outside dbt exist only here.
--- System tables are populated a few minutes after a query runs. A NULL source is a file load (a seed).
+-- System tables are not real-time; record availability varies by table, so re-run if an edge is missing.
+-- A NULL source means a write with no source table, such as a seed load.
 
 select distinct
 

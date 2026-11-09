@@ -72,7 +72,7 @@ columns**, has no tags, no access controls and no audit trail. Lab 5.1 closes ev
 | No column descriptions | 1 and 2 | descriptions and doc blocks → `dbt docs generate` |
 | Docs only on the dbt site | 3 | `persist_docs` → comments in Unity Catalog |
 | No ownership or classification | 4 | `meta`, `tags` and `databricks_tags` |
-| Anyone can read the email column | 5 | `grants` and a Unity Catalog column mask |
+| Anyone can read the email column of `dim_customers` | 5 | `grants` and a Unity Catalog column mask |
 | Two lineage views, never compared | 6 | `compare_lineage.py` and the Lineage tab |
 | No record of what ran or why | 7 | pinned dbt versions, run artifacts, `query_tags` |
 

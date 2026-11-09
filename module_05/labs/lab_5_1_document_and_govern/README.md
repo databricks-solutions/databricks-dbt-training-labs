@@ -275,7 +275,8 @@ Two graphs, two different questions:
 | Where | The docs site; `manifest.json` | Catalog Explorer, `system.access.*` |
 
 Look at Unity Catalog's graph: open `fct_orders` in Catalog Explorer and select **Lineage**. Then
-compare the two programmatically (system tables fill in a few minutes after a query runs):
+compare the two programmatically once your build has finished. System tables are not real-time and record
+availability varies by table (see the [system tables reference](https://docs.databricks.com/aws/en/admin/system-tables/)), so if an edge is missing, re-run it:
 
 ```bash
 python3 scripts/compare_lineage.py
@@ -297,7 +298,7 @@ create table <catalog>.<schema>.analyst_scratch as
 select order_status, count(*) as orders from <catalog>.<schema>.fct_orders group by 1;
 ```
 
-Run `compare_lineage.py` again after a few minutes. `fct_orders → analyst_scratch` appears under
+Run `compare_lineage.py` again (re-run it if the new edge is not there yet). `fct_orders → analyst_scratch` appears under
 **Unity Catalog only**: a consumer your dbt project never declared. This is why the two are
 *complementary*. Drop the table when you are done.
 
@@ -320,7 +321,8 @@ and audit it if you can later answer *who ran what, when, and with what result*.
 
 Your `profiles.yml` already carries `query_tags: '{"project": "module_05", "team": "analytics"}'`.
 dbt-databricks adds its own tags to every query too (`@@dbt_model_name`, `@@dbt_materialized`,
-versions). Rebuild, wait a few minutes, then run `analyses/query_audit.sql`. Every statement dbt
+versions). Rebuild, then run `analyses/query_audit.sql`. Query history records are typically available within an hour
+([record availability](https://docs.databricks.com/aws/en/admin/system-tables/query-history)), so re-run it if it comes back empty. Every statement dbt
 sent is attributable to a project, a team, a model and a user.
 
 ```bash
@@ -328,8 +330,9 @@ dbt docs generate
 python3 scripts/doc_coverage.py --min 100 && echo "documentation gate passed"
 ```
 
-The gate counts the tables and views in Unity Catalog. It fails below 100% of columns, and when a model
-has no description at all. Ephemeral models are not counted, because they have no table to compare with.
+The gate counts the tables and views in Unity Catalog. It fails below 100% of columns, when a model
+has no description at all, and when a model is missing from `catalog.json` (not built, or `dbt docs generate`
+was limited with `--select`). Ephemeral models are not counted, because they have no table to compare with.
 
 ## Check your work
 
@@ -351,9 +354,10 @@ has no description at all. Ephemeral models are not counted, because they have n
 - **Tags are not removed by deleting them from YAML.** dbt applies tags but does not unset the ones you
   stop listing. Remove stale tags yourself (`ALTER TABLE ... UNSET TAGS`). Grants are different: dbt
   *does* revoke them.
-- **A mask is not a grant.** A user with `SELECT` still reads the table; the mask changes what they see
-  in one column. Use both.
-- **Lineage is runtime.** Unity Catalog records what ran. A model you have not built has no lineage,
-  and system tables lag by minutes. Column lineage needs tables referenced by name, not by path.
+- **A mask is not a grant, and it covers one column of one table.** A user with `SELECT` still reads the table; the mask changes what they see in `dim_customers.customer_email`. The raw address is still in the `customers` seed and the `stg_customers` view, so in a real project restrict who can read raw and staging schemas with grants too.
+- **Lineage is runtime.** Unity Catalog records what ran, so a model you have not built has no lineage.
+  Column lineage needs tables referenced by name, not by path.
+- **System tables are not real-time.** Record availability varies by table (query history is typically
+  available within an hour), so re-run a lineage or audit query before concluding a record is missing.
 - **Ephemeral models never reach Unity Catalog.** They are in the dbt graph and in no table, comment
   or lineage edge. Document them in dbt, and know that Unity Catalog will not show them.

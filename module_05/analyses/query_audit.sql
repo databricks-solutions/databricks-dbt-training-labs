@@ -1,7 +1,8 @@
 -- Who ran which dbt queries, tagged with what? Shows YOUR queries from the last 7 days; delete the
--- executed_by line to see everyone's (needs permission to read the whole table). Reads the query tags set in profiles.yml (query_tags)
--- plus the tags dbt-databricks always adds (@@dbt_model_name, @@dbt_materialized, versions).
--- System tables are populated a few minutes after a query runs.
+-- executed_by line to see everyone's (needs permission to read the whole table).
+-- Query history records are typically available within an hour, so re-run if it is empty.
+-- Reads the query tags set in profiles.yml (query_tags) plus the tags dbt-databricks always adds
+-- (@@dbt_model_name, @@dbt_materialized, versions).
 
 select
 

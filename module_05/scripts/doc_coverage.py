@@ -10,8 +10,9 @@ way to catch a column that exists in Unity Catalog but has no description in dbt
 
 Only models that exist in the warehouse are counted: this project's tables and views, not seeds, tests,
 package models or ephemeral models (an ephemeral model has no table, so it has no catalog entry and
-its columns cannot be checked against what really exists). With --min, a built model with no
-model-level description also fails the gate.
+its columns cannot be checked against what really exists). With --min the gate also fails when a
+built model has no model-level description, or is missing from catalog.json altogether (it was not
+built, or `dbt docs generate` was limited with --select), so it cannot pass by skipping a model.
 """
 
 import argparse
@@ -42,16 +43,20 @@ def main():
         print("warning: catalog.json is older than manifest.json. Run `dbt docs generate` for fresh numbers.",
               file=sys.stderr)
 
-    rows, total, documented, undescribed = [], 0, 0, []
+    rows, total, documented, undescribed, not_in_catalog = [], 0, 0, [], []
     for uid, node in sorted(manifest["nodes"].items()):
         if node["resource_type"] != "model" or node["package_name"] != manifest["metadata"]["project_name"]:
             continue
         built = catalog["nodes"].get(uid)
-        if built is None:  # ephemeral models never exist in the warehouse, so they have no catalog entry
+        if built is None:
+            # An ephemeral model never exists in the warehouse, so it has no catalog entry by design.
+            # Anything else missing from the catalog was not built: remember it so the gate can fail.
+            if node["config"].get("materialized") != "ephemeral":
+                not_in_catalog.append(node["name"])
             continue
         cols = list(built["columns"])
-        yml = node["columns"]
-        described = [c for c in cols if (yml.get(c.lower(), yml.get(c, {})).get("description") or "").strip()]
+        yml = {k.lower(): v for k, v in node["columns"].items()}  # Unity Catalog names are lower case
+        described = [c for c in cols if (yml.get(c.lower(), {}).get("description") or "").strip()]
         has_desc = bool((node.get("description") or "").strip())
         if not has_desc:
             undescribed.append(node["name"])
@@ -66,12 +71,18 @@ def main():
     if not total:
         sys.exit("no built models found in catalog.json. Run `dbt build`, then `dbt docs generate`, then try again.")
     pct = 100 * documented / total
-    print(f"\ncolumn documentation coverage: {documented}/{total} = {pct:.0f}%")
+    shown = f"{int(pct)}%" if pct == int(pct) else f"{pct:.1f}%"  # never round 99.75 up to a passing "100%"
+    print(f"\ncolumn documentation coverage: {documented}/{total} = {shown}")
+    if not_in_catalog:
+        print(f"not in catalog.json (not built?): {', '.join(not_in_catalog)}")
 
     if args.min is not None and pct < args.min:
-        sys.exit(f"coverage {pct:.0f}% is below the required {args.min:.0f}%")
+        sys.exit(f"coverage {shown} is below the required {args.min:g}%")
     if args.min is not None and undescribed:
         sys.exit(f"models with no description: {', '.join(undescribed)}")
+    if args.min is not None and not_in_catalog:
+        sys.exit(f"models missing from catalog.json: {', '.join(not_in_catalog)}. "
+                 "Run `dbt build`, then `dbt docs generate`.")
 
 
 if __name__ == "__main__":

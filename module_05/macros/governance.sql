@@ -15,7 +15,10 @@
 {% macro create_pii_mask_function() %}
 
     {%- set fn = '`' ~ target.catalog ~ '`.`' ~ target.schema ~ '`.mask_email' -%}
-    {%- set group = var('pii_reader_group', 'pii_readers') | replace("'", "''") -%}
+    {%- set group = var('pii_reader_group', 'pii_readers') -%}
+    {%- if not modules.re.match('^[A-Za-z0-9 _.@-]+$', group) -%}
+        {{ exceptions.raise_compiler_error("pii_reader_group may only contain letters, digits, spaces and _ . @ -") }}
+    {%- endif -%}
 
     create or replace function {{ fn }}(email string)
     returns string
