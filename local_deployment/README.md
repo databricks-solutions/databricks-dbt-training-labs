@@ -410,5 +410,6 @@ resources:
 ```
 
 > **Version pins:** Module 3 jobs require `dbt-databricks>=1.11.7` because the `insert_overwrite`
-> labs depend on `REPLACE ON` behaviour. Module 4 pins `dbt-databricks==1.11.7`, the version it was validated on. Module 5 also pins
-> `dbt-core==1.11.8`, so the deployed run matches the local one. Lab 01's job keeps `>=1.8.0`.
+> labs depend on `REPLACE ON` behaviour. Module 4 pins `dbt-databricks==1.11.7`, the version it was
+> validated on. Module 5 also pins `dbt-core==1.11.8`, so the deployed run matches the local one.
+> Lab 01's job keeps `>=1.8.0`.

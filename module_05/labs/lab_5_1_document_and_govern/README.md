@@ -178,9 +178,10 @@ dbt compile                        # compiles the analyses to target/compiled/mo
 > `databricks_tags` (and `column_mask`, step 5) go **directly on the column**, not under its `config:`.
 > Put them under `config:` and dbt builds green and silently applies nothing.
 >
-> dbt 1.11 then prints `CustomKeyInObjectDeprecation` ("this may mean the key is a typo"). That is
-> dbt-core's schema check, which does not know these two adapter keys. dbt-databricks 1.11 reads them
-> from the column anyway, so the settings do apply. A future dbt-core could turn the warning into an error.
+> With `column_mask` on a column, dbt 1.11 prints `CustomKeyInObjectDeprecation` ("this may mean the key
+> is a typo"). That is dbt-core's schema check, which does not know this adapter key (it does know
+> `databricks_tags`, so those never warn). dbt-databricks 1.11 reads `column_mask` from the column
+> anyway, so the mask does apply. A future dbt-core could turn the warning into an error.
 
 ### 5. Control access
 

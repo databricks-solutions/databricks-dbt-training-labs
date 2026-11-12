@@ -118,7 +118,7 @@ dbt-databricks 1.11.7, into an empty schema:
 | Tags in Unity Catalog | 2 table tags on each mart, `data_classification = pii` on 2 columns of `dim_customers` |
 | Column mask | `customer_email` returns `***@example.com`; with `pii_reader_group` set to a group you belong to, it returns the real address, and restoring the var masks it again. The mask survives rebuilds. |
 | Grants | with `reader_principal` set, `SELECT` is granted on both marts; rebuilding without it **revokes** it |
-| Lakeflow Jobs (DABs) | `module_05_seed_job` then `module_05_build_job` both **succeed** on Serverless; the schema ends with 12 objects (5 seeds and 2 tables, 5 views) |
+| Lakeflow Jobs (DABs) | `module_05_seed_job` then `module_05_build_job` both **succeed** on Serverless; the schema ends with 12 objects (5 seed tables, 2 model tables and 5 views) |
 | Lineage | all 10 table-level edges Unity Catalog recorded match a dbt path once the ephemeral model is bridged; the 4 dbt-only edges all touch the ephemeral model or the exposure |
 
 Row counts, node counts and coverage numbers are for the supplied seed. Verify against your own run

@@ -15,9 +15,9 @@ models:
       - name: customer_id
         description: "{{ doc('customer_id') }}"
       - name: customer_name
-        description: "The customer's full name. {{ doc('pii_notice') }}"
+        description: "The customer's full name. {{ doc('pii_notice_staging') }}"
       - name: customer_email
-        description: "The customer's email address. {{ doc('pii_notice') }}"
+        description: "The customer's email address. {{ doc('pii_notice_staging') }}"
 
   - name: stg_products
     description: One row per SKU, straight from the products seed.

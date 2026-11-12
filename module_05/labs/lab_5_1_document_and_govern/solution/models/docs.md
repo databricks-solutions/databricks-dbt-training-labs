@@ -41,3 +41,12 @@ Where the order is in its life: `placed`, `shipped`, `delivered`, `returned` or 
 {% docs pii_notice %}
 Personal data. Tagged `data_classification = pii` in Unity Catalog. Do not copy it out of the governed schema.
 {% enddocs %}
+
+{#
+    Staging columns are NOT tagged in Unity Catalog (only the dim_customers columns are), so they get a
+    block that makes no claim about tags. persist_docs writes this text into the column comment, so a
+    description must only say what is true of that column.
+#}
+{% docs pii_notice_staging %}
+Personal data. Do not copy it out of the governed schema.
+{% enddocs %}
