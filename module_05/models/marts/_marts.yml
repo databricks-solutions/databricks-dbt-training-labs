@@ -1,0 +1,10 @@
+version: 2
+
+# STARTER YAML: one-line model descriptions only. See labs/lab_5_1_document_and_govern/.
+
+models:
+  - name: dim_customers
+    description: One row per customer, with their order history. Contains personal data.
+
+  - name: fct_orders
+    description: One row per order.

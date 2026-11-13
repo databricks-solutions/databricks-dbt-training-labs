@@ -1,0 +1,31 @@
+config-version: 2
+
+name: "module_05"
+version: "1.0.0"
+require-dbt-version: ">=1.11.0"
+
+profile: module_05
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Module 5 is self-contained: `dbt seed` loads a small CLEAN fixture set into YOUR schema, so every
+# learner documents and governs the same objects and nothing is shared between learners.
+#
+# This is the STARTER state: models carry a one-line description and nothing else. Lab 5.1 adds the
+# metadata (persist_docs, tags, doc blocks), the access controls (grants, a column mask) and the
+# audit trail (query tags). See README.md and labs/lab_5_1_document_and_govern/.
+models:
+  module_05:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: ephemeral
+    marts:
+      +materialized: table

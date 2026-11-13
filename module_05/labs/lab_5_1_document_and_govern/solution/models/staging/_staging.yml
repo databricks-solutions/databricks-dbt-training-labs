@@ -1,0 +1,74 @@
+version: 2
+
+# Lab 5.1 solution: every model and column documented, reusing doc blocks (see models/docs.md).
+# Staging models carry descriptions and meta; the UC tags and masks live on the marts.
+
+models:
+  - name: stg_customers
+    description: One row per customer, straight from the customers seed.
+    config:
+      meta:
+        owner: data-platform
+        contains_pii: true
+      tags: [pii]
+    columns:
+      - name: customer_id
+        description: "{{ doc('customer_id') }}"
+      - name: customer_name
+        description: "The customer's full name. {{ doc('pii_notice_staging') }}"
+      - name: customer_email
+        description: "The customer's email address. {{ doc('pii_notice_staging') }}"
+
+  - name: stg_products
+    description: One row per SKU, straight from the products seed.
+    columns:
+      - name: product_id
+        description: The product's key (SKU).
+      - name: product_name
+        description: Display name.
+      - name: product_type
+        description: Either `jaffle` or `beverage`.
+      - name: product_price
+        description: List price in dollars.
+
+  - name: stg_locations
+    description: One row per store, straight from the locations seed.
+    columns:
+      - name: location_id
+        description: The store's key.
+      - name: location_name
+        description: The city the store trades in.
+      - name: opened_at
+        description: The date the store opened.
+      - name: tax_rate
+        description: Sales tax rate applied at this store.
+
+  - name: stg_orders
+    description: One row per order, straight from the orders seed.
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id') }}"
+      - name: customer_id
+        description: "{{ doc('customer_id') }} Foreign key to stg_customers."
+      - name: location_id
+        description: The store the order was placed at. Foreign key to stg_locations.
+      - name: order_date
+        description: The date the order was placed.
+      - name: order_status
+        description: "{{ doc('order_status') }}"
+      - name: subtotal
+        description: Order value before tax, in dollars.
+      - name: tax_paid
+        description: Tax charged on the order, in dollars.
+      - name: order_total
+        description: Order value including tax, in dollars (subtotal + tax_paid).
+
+  - name: stg_order_items
+    description: One row per item on an order, straight from the order_items seed.
+    columns:
+      - name: order_item_id
+        description: The line's key.
+      - name: order_id
+        description: "{{ doc('order_id') }} Foreign key to stg_orders."
+      - name: product_id
+        description: The product on this line. Foreign key to stg_products.

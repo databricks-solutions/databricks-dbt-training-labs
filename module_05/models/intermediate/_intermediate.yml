@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: int_customer_orders
+    description: Per-customer order rollup. Ephemeral, so it exists in the dbt DAG but never in Unity Catalog.

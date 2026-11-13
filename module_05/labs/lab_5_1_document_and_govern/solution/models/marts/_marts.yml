@@ -1,0 +1,81 @@
+version: 2
+
+# Lab 5.1 solution. Three kinds of metadata live on these models:
+#   dbt metadata        meta, tags            -> the dbt docs site and node selection
+#   documentation       description           -> the docs site AND Unity Catalog (persist_docs)
+#   Unity Catalog       databricks_tags,      -> applied to the table by dbt-databricks after it builds
+#   governance          grants, column_mask
+
+models:
+  - name: dim_customers
+    description: >
+      One row per customer, with their order history. A Delta table. Contains personal data
+      (name and email), so the email column is masked for everyone outside the PII reader group.
+    config:
+      meta:
+        owner: data-platform
+        contains_pii: true
+        maturity: production
+      tags: [pii]
+      databricks_tags:
+        domain: sales
+        contains_pii: "true"
+      grants:
+        select: "{{ [var('reader_principal')] if var('reader_principal', '') else [] }}"
+    columns:
+      - name: customer_id
+        description: "{{ doc('customer_id') }}"
+      - name: customer_name
+        description: "The customer's full name. {{ doc('pii_notice') }}"
+        databricks_tags:
+          data_classification: pii
+      - name: customer_email
+        description: "The customer's email address, masked unless you are in the PII reader group. {{ doc('pii_notice') }}"
+        databricks_tags:
+          data_classification: pii
+        column_mask:
+          function: "`{{ target.catalog }}`.`{{ target.schema }}`.mask_email"
+      - name: count_orders
+        description: Number of orders the customer has placed, in any status. 0 if none.
+      - name: first_order_date
+        description: The date of the customer's first order. NULL if none.
+      - name: last_order_date
+        description: The date of the customer's most recent order. NULL if none.
+      - name: lifetime_spend
+        description: Total order value in dollars, excluding cancelled and returned orders. 0 if none.
+
+  - name: fct_orders
+    description: >
+      One row per order, a Delta table. Holds no personal data, so it is safe to share more widely
+      than dim_customers.
+    config:
+      meta:
+        owner: data-platform
+        contains_pii: false
+        maturity: production
+      databricks_tags:
+        domain: sales
+        contains_pii: "false"
+      grants:
+        select: "{{ [var('reader_principal')] if var('reader_principal', '') else [] }}"
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id') }}"
+      - name: customer_id
+        description: "{{ doc('customer_id') }} Foreign key to dim_customers."
+      - name: location_id
+        description: The store the order was placed at.
+      - name: location_name
+        description: The city the order was placed in.
+      - name: order_date
+        description: The date the order was placed.
+      - name: order_status
+        description: "{{ doc('order_status') }}"
+      - name: subtotal
+        description: Order value before tax, in dollars.
+      - name: tax_paid
+        description: Tax charged on the order, in dollars.
+      - name: order_total
+        description: Order value including tax, in dollars.
+      - name: count_order_items
+        description: Number of item lines on the order. 0 for item-less orders.
